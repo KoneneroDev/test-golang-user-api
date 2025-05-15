@@ -4,8 +4,10 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
+	"net/http"
 	"os"
 	"test_golang_user_api/internal/config"
+	"test_golang_user_api/internal/http_server/handlers/uri/save"
 	"test_golang_user_api/internal/storage/postgres"
 )
 
@@ -15,8 +17,8 @@ func main() {
 	log := slog.New(
 		slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
 	)
-
-	log.Info("starting server ", slog.String("env", cfg.Env))
+	log.Info("starting server with", slog.String("env", cfg.Env))
+	log.Info("starting connect to db")
 
 	storage, err := postgres.New(cfg.Data.Postgres)
 	if err != nil {
@@ -30,5 +32,20 @@ func main() {
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	//todo: start
+	router.Post("/user", save.New(log, storage))
+
+	server := &http.Server{
+		Addr:         cfg.HTTPServer.Address,
+		Handler:      router,
+		ReadTimeout:  cfg.HTTPServer.Timeout,
+		WriteTimeout: cfg.HTTPServer.Timeout,
+		IdleTimeout:  cfg.HTTPServer.IdleTimeout,
+	}
+
+	log.Info("starting http server on ", slog.String("host", cfg.HTTPServer.Address))
+
+	if err := server.ListenAndServe(); err != nil {
+		log.Error("failed to start http server", err)
+	}
+
 }

@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-type User struct {
+type UserDto struct {
 	ID        uuid.UUID
 	Firstname string
 	Lastname  string
@@ -22,8 +22,8 @@ type User struct {
 	Created   time.Time
 }
 
-func NewUser(firstname, lastname, email string, age int) *User {
-	return &User{
+func NewUser(firstname, lastname, email string, age int) *UserDto {
+	return &UserDto{
 		ID:        uuid.New(),
 		Firstname: firstname,
 		Lastname:  lastname,
@@ -88,7 +88,7 @@ func runMigrations(db *sql.DB) error {
 	return nil
 }
 
-func (s *Storage) CreateUser(user *User) error {
+func (s *Storage) CreateUser(user *UserDto) error {
 	query := `INSERT INTO users (id, firstname, lastname, email, age, created) 
 	          VALUES ($1, $2, $3, $4, $5, $6)`
 
@@ -100,10 +100,10 @@ func (s *Storage) CreateUser(user *User) error {
 	return nil
 }
 
-func (s *Storage) GetUser(id uuid.UUID) (User, error) {
+func (s *Storage) GetUser(id uuid.UUID) (UserDto, error) {
 	query := `SELECT id, firstname, lastname, email, age, created FROM users WHERE id = $1`
 
-	var user User
+	var user UserDto
 	err := s.db.QueryRow(query, id).Scan(
 		&user.ID,
 		&user.Firstname,
@@ -123,13 +123,13 @@ func (s *Storage) GetUser(id uuid.UUID) (User, error) {
 	return user, nil
 }
 
-func (s *Storage) EditUser(user User) (User, error) {
+func (s *Storage) EditUser(user UserDto) (UserDto, error) {
 	query := `UPDATE users SET firstname = $1, lastname = $2, email = $3, age = $4 WHERE id = $5`
 
 	_, err := s.db.Exec(query, user.Firstname, user.Lastname, user.Email, user.Age, user.ID)
 
 	if err != nil {
-		return User{}, fmt.Errorf("failed to update user: %w", err)
+		return UserDto{}, fmt.Errorf("failed to update user: %w", err)
 	}
 
 	return user, nil
