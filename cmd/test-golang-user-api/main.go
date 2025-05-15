@@ -4,6 +4,7 @@ import (
 	"log/slog"
 	"os"
 	"test_golang_user_api/internal/config"
+	"test_golang_user_api/internal/storage/postgres"
 )
 
 func main() {
@@ -15,7 +16,16 @@ func main() {
 
 	log.Info("starting server ", slog.String("env", cfg.Env))
 
-	//todo: storage
+	storage, err := postgres.New(cfg.Data.Postgres)
+
+	if err != nil {
+		log.Error("failed to connect to database", err)
+		os.Exit(1)
+	}
+
+	log.Info("starting connect to db")
+
+	_ = storage
 
 	//todo: router
 
