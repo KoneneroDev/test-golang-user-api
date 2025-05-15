@@ -17,12 +17,10 @@ func main() {
 	log.Info("starting server ", slog.String("env", cfg.Env))
 
 	storage, err := postgres.New(cfg.Data.Postgres)
-
 	if err != nil {
 		log.Error("failed to connect to database", err)
 		os.Exit(1)
 	}
-
 	log.Info("finished connect to db")
 
 	_ = storage
