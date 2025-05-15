@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"log/slog"
 	"os"
 	"test_golang_user_api/internal/config"
@@ -23,9 +25,10 @@ func main() {
 	}
 	log.Info("finished connect to db")
 
-	_ = storage
-
-	//todo: router
+	router := chi.NewRouter()
+	router.Use(middleware.RequestID)
+	router.Use(middleware.Recoverer)
+	router.Use(middleware.URLFormat)
 
 	//todo: start
 }
