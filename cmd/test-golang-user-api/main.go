@@ -23,7 +23,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.Info("starting connect to db")
+	log.Info("finished connect to db")
 
 	_ = storage
 
