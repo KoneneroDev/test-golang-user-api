@@ -13,7 +13,7 @@ import (
 )
 
 type UserCRUD interface {
-	EditUser(user *postgres.UserDto) (postgres.UserDto, error)
+	EditUser(user *postgres.UserDto) (*postgres.UserDto, error)
 }
 
 func New(log *slog.Logger, userCrud UserCRUD) http.HandlerFunc {
@@ -47,7 +47,7 @@ func New(log *slog.Logger, userCrud UserCRUD) http.HandlerFunc {
 			return
 		}
 
-		user, err := userCrud.EditUser(postgres.EditUser(id, req.Firstname, req.Lastname, req.Email, req.Age))
+		user, err := userCrud.EditUser(postgres.NewUser(id, req.Firstname, req.Lastname, req.Email, req.Age))
 		if err != nil {
 			log.Error("Error edit user", err)
 			render.JSON(writer, request, api.ErrorStatus("Failed to edit user"))

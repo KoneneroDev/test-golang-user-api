@@ -4,6 +4,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"log/slog"
 	"net/http"
 	"test_golang_user_api/internal/api"
@@ -36,7 +37,7 @@ func New(log *slog.Logger, userCrud UserCRUD) http.HandlerFunc {
 			return
 		}
 
-		err = userCrud.CreateUser(postgres.NewUser(req.Firstname, req.Lastname, req.Email, req.Age))
+		err = userCrud.CreateUser(postgres.NewUser(uuid.New(), req.Firstname, req.Lastname, req.Email, req.Age))
 		if err != nil {
 			log.Error("Error creating user", err)
 			render.JSON(writer, request, api.ErrorStatus("Failed to create user"))

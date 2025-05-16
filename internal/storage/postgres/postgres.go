@@ -22,24 +22,14 @@ type UserDto struct {
 	Created   time.Time
 }
 
-func NewUser(firstname, lastname, email string, age int) *UserDto {
-	return &UserDto{
-		ID:        uuid.New(),
-		Firstname: firstname,
-		Lastname:  lastname,
-		Email:     email,
-		Age:       age,
-		Created:   time.Now(),
-	}
-}
-
-func EditUser(id uuid.UUID, firstname, lastname, email string, age int) *UserDto {
+func NewUser(id uuid.UUID, firstname, lastname, email string, age int) *UserDto {
 	return &UserDto{
 		ID:        id,
 		Firstname: firstname,
 		Lastname:  lastname,
 		Email:     email,
 		Age:       age,
+		Created:   time.Now(),
 	}
 }
 
@@ -110,7 +100,7 @@ func (s *Storage) CreateUser(user *UserDto) error {
 	return nil
 }
 
-func (s *Storage) GetUser(id uuid.UUID) (UserDto, error) {
+func (s *Storage) GetUser(id uuid.UUID) (*UserDto, error) {
 	query := `SELECT id, firstname, lastname, email, age, created FROM users WHERE id = $1`
 
 	var user UserDto
@@ -125,31 +115,50 @@ func (s *Storage) GetUser(id uuid.UUID) (UserDto, error) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return user, fmt.Errorf("user not found: %w", err)
+			return nil, fmt.Errorf("user not found: %w", err)
 		}
-		return user, fmt.Errorf("query failed: %w", err)
+		return nil, fmt.Errorf("query failed: %w", err)
+	}
+
+	return &user, nil
+}
+
+func (s *Storage) EditUser(user *UserDto) (*UserDto, error) {
+	query := `UPDATE users SET firstname = $1, lastname = $2, email = $3, age = $4 WHERE id = $5`
+
+	result, err := s.db.Exec(query, user.Firstname, user.Lastname, user.Email, user.Age, user.ID)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to update user: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return nil, fmt.Errorf("user not found")
 	}
 
 	return user, nil
 }
 
-func (s *Storage) EditUser(user *UserDto) (UserDto, error) {
-	query := `UPDATE users SET firstname = $1, lastname = $2, email = $3, age = $4 WHERE id = $5`
-
-	_, err := s.db.Exec(query, user.Firstname, user.Lastname, user.Email, user.Age, user.ID)
-
-	if err != nil {
-		return UserDto{}, fmt.Errorf("failed to update user: %w", err)
-	}
-
-	return *user, nil
-}
-
 func (s *Storage) DeleteUser(id uuid.UUID) error {
 	query := `DELETE FROM users WHERE id = $1`
-	_, err := s.db.Exec(query, id)
+	result, err := s.db.Exec(query, id)
 	if err != nil {
 		return fmt.Errorf("failed to delete user: %w", err)
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return fmt.Errorf("failed to get rows affected: %w", err)
+	}
+
+	if rows == 0 {
+		return fmt.Errorf("user not found")
 	}
 	return nil
 }

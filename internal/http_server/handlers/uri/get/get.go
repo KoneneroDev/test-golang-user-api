@@ -12,7 +12,7 @@ import (
 )
 
 type UserCRUD interface {
-	GetUser(id uuid.UUID) (postgres.UserDto, error)
+	GetUser(id uuid.UUID) (*postgres.UserDto, error)
 }
 
 func New(log *slog.Logger, crud UserCRUD) http.HandlerFunc {
