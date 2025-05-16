@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"test_golang_user_api/internal/config"
+	dr "test_golang_user_api/internal/http_server/handlers/uri/delete"
 	"test_golang_user_api/internal/http_server/handlers/uri/save"
 	"test_golang_user_api/internal/storage/postgres"
 )
@@ -33,6 +34,7 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	router.Post("/user", save.New(log, storage))
+	router.Delete("/user/{id}", dr.New(log, storage))
 
 	server := &http.Server{
 		Addr:         cfg.HTTPServer.Address,
