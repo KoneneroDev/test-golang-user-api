@@ -33,6 +33,16 @@ func NewUser(firstname, lastname, email string, age int) *UserDto {
 	}
 }
 
+func EditUser(id uuid.UUID, firstname, lastname, email string, age int) *UserDto {
+	return &UserDto{
+		ID:        id,
+		Firstname: firstname,
+		Lastname:  lastname,
+		Email:     email,
+		Age:       age,
+	}
+}
+
 type Storage struct {
 	db *sql.DB
 }
@@ -123,7 +133,7 @@ func (s *Storage) GetUser(id uuid.UUID) (UserDto, error) {
 	return user, nil
 }
 
-func (s *Storage) EditUser(user UserDto) (UserDto, error) {
+func (s *Storage) EditUser(user *UserDto) (UserDto, error) {
 	query := `UPDATE users SET firstname = $1, lastname = $2, email = $3, age = $4 WHERE id = $5`
 
 	_, err := s.db.Exec(query, user.Firstname, user.Lastname, user.Email, user.Age, user.ID)
@@ -132,7 +142,7 @@ func (s *Storage) EditUser(user UserDto) (UserDto, error) {
 		return UserDto{}, fmt.Errorf("failed to update user: %w", err)
 	}
 
-	return user, nil
+	return *user, nil
 }
 
 func (s *Storage) DeleteUser(id uuid.UUID) error {
