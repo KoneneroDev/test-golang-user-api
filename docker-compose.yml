@@ -1,0 +1,35 @@
+version: "3.9"
+
+services:
+  app:
+    build: .
+    container_name: go-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      CONFIG_PATH: /app/config/local.yml
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      ADDRESS: 0.0.0.0:8080
+
+    volumes:
+      - ./config:/app/config
+    restart: unless-stopped
+
+  db:
+    image: postgres:15
+    container_name: postgres-db
+    restart: unless-stopped
+    ports:
+      - "57819:5432"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: integtest_users_tests_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

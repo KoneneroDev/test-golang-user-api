@@ -18,15 +18,15 @@ type Data struct {
 }
 
 type Postgres struct {
-	Host     string `yaml:"host" env-required:"true"`
-	Port     string `yaml:"port" env-required:"true"`
-	User     string `yaml:"user" env-required:"true"`
-	Password string `yaml:"password" env-required:"true"`
-	Dbname   string `yaml:"dbname" env-required:"true"`
+	Host     string `yaml:"host" env:"POSTGRES_HOST" env-required:"true"`
+	Port     string `yaml:"port" env:"POSTGRES_PORT" env-required:"true"`
+	User     string `yaml:"user" env:"POSTGRES_USER" env-required:"true"`
+	Password string `yaml:"password" env:"POSTGRES_PASSWORD" env-required:"true"`
+	Dbname   string `yaml:"dbname" env:"POSTGRES_DBNAME" env-required:"true"`
 }
 
 type HTTPServer struct {
-	Address     string        `yaml:"address" env-required:"true"`
+	Address     string        `yaml:"address" env:"ADDRESS" env-required:"true"`
 	Timeout     time.Duration `yaml:"timeout" env-default:"4s"`
 	IdleTimeout time.Duration `yaml:"idle_timeout" env-default:"60s"`
 }
@@ -45,6 +45,10 @@ func LoadConfig() *Config {
 
 	if err := cleanenv.ReadConfig(configPath, &config); err != nil {
 		log.Fatalf("failed to read config: %s", err)
+	}
+
+	if err := cleanenv.ReadEnv(&config); err != nil {
+		log.Fatalf("failed to override config with env: %s", err)
 	}
 
 	return &config
