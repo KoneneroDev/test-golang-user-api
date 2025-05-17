@@ -25,7 +25,7 @@ func New(log *slog.Logger, userCrud UserCRUD) http.HandlerFunc {
 
 		err := render.DecodeJSON(request.Body, &req)
 		if err != nil {
-			log.Error("Error decoding request body", err)
+			log.Error("Error decoding request body", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Failed to decode request body"))
 			return
 		}
@@ -36,20 +36,20 @@ func New(log *slog.Logger, userCrud UserCRUD) http.HandlerFunc {
 
 		id, err := uuid.Parse(idStr)
 		if err != nil {
-			log.Error("Invalid UUID", err)
+			log.Error("Invalid UUID", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Invalid UUID"))
 			return
 		}
 
 		if err := validator.New().Struct(req); err != nil {
-			log.Error("Error validating request body", err)
+			log.Error("Error validating request body", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Failed to validate request body"))
 			return
 		}
 
 		user, err := userCrud.EditUser(postgres.NewUser(id, req.Firstname, req.Lastname, req.Email, req.Age))
 		if err != nil {
-			log.Error("Error edit user", err)
+			log.Error("Error edit user", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Failed to edit user"))
 			return
 		}

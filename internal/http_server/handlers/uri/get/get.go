@@ -25,7 +25,7 @@ func New(log *slog.Logger, crud UserCRUD) http.HandlerFunc {
 
 		id, err := uuid.Parse(idStr)
 		if err != nil {
-			log.Error("Invalid UUID", err)
+			log.Error("Invalid UUID", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Invalid UUID"))
 			return
 		}
@@ -33,7 +33,7 @@ func New(log *slog.Logger, crud UserCRUD) http.HandlerFunc {
 		user, err := crud.GetUser(id)
 
 		if err != nil {
-			log.Error("User not found", err)
+			log.Error("User not found", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("User not found"))
 			return
 		}

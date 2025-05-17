@@ -24,7 +24,7 @@ func New(log *slog.Logger, userCrud UserCRUD) http.HandlerFunc {
 
 		err := render.DecodeJSON(request.Body, &req)
 		if err != nil {
-			log.Error("Error decoding request body", err)
+			log.Error("Error decoding request body", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Failed to decode request body"))
 			return
 		}
@@ -32,14 +32,14 @@ func New(log *slog.Logger, userCrud UserCRUD) http.HandlerFunc {
 		log.Info("Request body decoded", slog.Any("requestBody", req))
 
 		if err := validator.New().Struct(req); err != nil {
-			log.Error("Error validating request body", err)
+			log.Error("Error validating request body", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Failed to validate request body"))
 			return
 		}
 
 		err = userCrud.CreateUser(postgres.NewUser(uuid.New(), req.Firstname, req.Lastname, req.Email, req.Age))
 		if err != nil {
-			log.Error("Error creating user", err)
+			log.Error("Error creating user", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Failed to create user"))
 			return
 		}

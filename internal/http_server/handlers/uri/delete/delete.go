@@ -24,14 +24,14 @@ func New(log *slog.Logger, crud UserCRUD) http.HandlerFunc {
 
 		id, err := uuid.Parse(idStr)
 		if err != nil {
-			log.Error("Invalid UUID", err)
+			log.Error("Invalid UUID", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Invalid UUID"))
 			return
 		}
 
 		err = crud.DeleteUser(id)
 		if err != nil {
-			log.Error("Error deleting user", err)
+			log.Error("Error deleting user", slog.Any("err", err))
 			render.JSON(writer, request, api.ErrorStatus("Failed to delete user"))
 			return
 		}
